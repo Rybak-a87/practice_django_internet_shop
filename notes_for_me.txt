@@ -1,0 +1,21 @@
+Этапы создания сайта
+(пометки по обучению если возникнут какие либо вопросы)
+
+-------
+Созание вертуального окружения:
+python -m venv <имя окружения>
+Зайти в вертуальное окружение:
+Linux: source <имя окружения>/bin/activate
+Windows: <имя окружения>\Scripts\activate
+Выйти извертуального окружения:
+deactivate
+-------
+
+1. Создание проекта, приложения, миграций, суперпользователя, запуск локального сервера
+    a) django-admin startproject <имя проекта> . (точка не создает подкаталог с именем проекта)
+    b) python manage.py startapp <имя приложения>
+    c) python manage.py makemigrations
+       python manage.py migrate
+    d) python manage.py createsuperuser
+    e) python manage.py runserver
+
