@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -52,10 +52,11 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'shop.urls'
 
+TEMPLATE_DIR = os.path.join(BASE_DIR, "templates")    # определение папки шаблонов "templates" в корне проекта
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [TEMPLATE_DIR],    # подключение папки "templates" в корне проекта (пустой список - папка "templates" в каждом приложении)
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -119,3 +120,11 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, "static_root")
+STATIC_DIR = os.path.join(BASE_DIR, "static")    # подключение папки "static" в корне проекта
+STATICFILES_DIRS = (    # директории где Джанго будет искать статические файлы для перемещения их в дерикторию "static_root"
+    STATIC_DIR,
+)
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")    # подключение папки "media" в корне проекта

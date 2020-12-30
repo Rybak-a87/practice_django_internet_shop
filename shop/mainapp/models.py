@@ -89,3 +89,13 @@ class Customer(models.Model):
 
     def __str__(self):
         return f"Покупатель {self.user.first_name} {self.user.last_name}"
+
+
+'''
+# для теста и настройки медиа контента
+class TestModelForImage(models.Model):
+    image = models.ImageField()
+
+    def __str__(self):
+        return str(self.id)
+'''
