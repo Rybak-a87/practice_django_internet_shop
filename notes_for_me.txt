@@ -19,3 +19,5 @@ deactivate
     d) python manage.py createsuperuser
     e) python manage.py runserver
 
+2. Создание моделей приложения (таблицы базы данных)
+
