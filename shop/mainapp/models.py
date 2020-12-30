@@ -1,9 +1,13 @@
+import sys
 from PIL import Image
 
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
+from django.core.files.uploadedfile import InMemoryUploadedFile
+
+from io import BytesIO    # для преобразования изображения в байты
 
 
 User = get_user_model()    # юзер из settings.AUTH_USER_MODEL
@@ -71,14 +75,30 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):  # переопределение и сохранение изображения
         """ проверка по размеру и разрешению изображения """
+        # image = self.image
+        # img = Image.open(image)
+        # min_height, min_width = self.MIN_RESOLUTION  # минимальное разрешение картинки
+        # max_height, max_width = self.MAX_RESOLUTION  # максимальное разрешение картинки
+        # if img.height < min_height or img.width < min_width:  # проверка на минимальное разрешение изображения
+        #     raise MinResolutionErrorException("Разрешение изображения меньше минимального!")
+        # if img.height > max_height or img.width > max_width:  # проверка на максимальное разрешение изображения
+        #     raise MaxResolutionErrorException("Разрешение изображения больше максимального!")
+        # super().save(*args, **kwargs)
+
+        """ обрезка изображения """
         image = self.image
         img = Image.open(image)
-        min_height, min_width = self.MIN_RESOLUTION  # минимальное разрешение картинки
-        max_height, max_width = self.MAX_RESOLUTION  # максимальное разрешение картинки
-        if img.height < min_height or img.width < min_width:  # проверка на минимальное разрешение изображения
-            raise MinResolutionErrorException("Разрешение изображения меньше минимального!")
-        if img.height > max_height or img.width > max_width:  # проверка на максимальное разрешение изображения
-            raise MaxResolutionErrorException("Разрешение изображения больше максимального!")
+        new_img = img.convert("RGB")  # конвертирование изображения c "RGBA" в "RGB"
+        resize_new_img = new_img.resize((200, 200),
+                                        resample=Image.ANTIALIAS)  # (первый способ) 1-до какого разрешения уменьшить изображение 2-способ уменьшения (resize необходимо заносить в новую переменную)
+        # new_img.thumbnail((200, 200),resample=Image.ANTIALIAS)    # (второй способ) не нужно заносить в новую переменную (меняет существующюю переменную)
+        filestream = BytesIO()  # преобразование изображения в поток данных (байты)
+        resize_new_img.save(filestream, "JPEG", quality=90)  # сохранить изображение в filestream, формат, качество
+        filestream.seek(0)
+        name = ".".join(self.image.name.split('.'))
+        self.image = InMemoryUploadedFile(  # 1-файл 2-название поля 3-имя файла 4-тип, 5-размер 6-charset?
+            filestream, "imageField", name, "jpeg/image", sys.getsizeof(filestream), None
+        )
         super().save(*args, **kwargs)
 
 
