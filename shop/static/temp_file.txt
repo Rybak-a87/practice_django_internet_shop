@@ -1,4 +1,0 @@
-Файл для "commit" пустой папки
-
-Если в этой папке есть другие файлы, необходимо удалить этот файл.
-If there are other files in this folder, you need to delete this file

@@ -5,4 +5,6 @@ from . import views
 app_name = "mainapp"    # имя приложения
 
 
-urlpatterns = []
+urlpatterns = [
+    path("", views.test_base, name="base"),
+]
