@@ -1,3 +1,5 @@
+from PIL import Image
+
 from django.db import models
 from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
@@ -5,6 +7,14 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 
 User = get_user_model()    # юзер из settings.AUTH_USER_MODEL
+
+
+class MinResolutionErrorException(Exception):    # ошибка при меньшем разрешении картинки
+    pass
+
+
+class MaxResolutionErrorException(Exception):    # ошибка при большем разрешении картинки
+    pass
 
 
 class LatestProductsManager:
@@ -58,6 +68,18 @@ class Product(models.Model):
 
     def __str__(self):
         return self.title
+
+    def save(self, *args, **kwargs):  # переопределение и сохранение изображения
+        """ проверка по размеру и разрешению изображения """
+        image = self.image
+        img = Image.open(image)
+        min_height, min_width = self.MIN_RESOLUTION  # минимальное разрешение картинки
+        max_height, max_width = self.MAX_RESOLUTION  # максимальное разрешение картинки
+        if img.height < min_height or img.width < min_width:  # проверка на минимальное разрешение изображения
+            raise MinResolutionErrorException("Разрешение изображения меньше минимального!")
+        if img.height > max_height or img.width > max_width:  # проверка на максимальное разрешение изображения
+            raise MaxResolutionErrorException("Разрешение изображения больше максимального!")
+        super().save(*args, **kwargs)
 
 
 class Notebook(Product):
