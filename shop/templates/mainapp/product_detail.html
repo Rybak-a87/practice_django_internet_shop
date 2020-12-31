@@ -22,6 +22,15 @@
 
     </div>
     <p class="mt-4">Характеристики:</p>
+
+<!--    (if) проверка условия или условий-->
+    {% if product.category.slug == "notebooks" %}
+<!--   (include) единоразовая вставка части кода с шаблоном html в нужное место-->
+        {% include "mainapp/include/notebook_specification.html" %}
+    {% else %}
+        {% include "mainapp/include/smartphone_specification.html" %}
+    {% endif %}
+
 </div>
 
 <!--закрытие блока с именем, который будет вставлен в базовый шаблон-->
