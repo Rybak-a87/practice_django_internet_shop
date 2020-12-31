@@ -1,12 +1,13 @@
-from PIL import Image    # работа с изображением
+# from PIL import Image    # работа с изображением
 
-from django.forms import ModelChoiceField, ModelForm, ValidationError
+from django.forms import ModelChoiceField    # ModelForm, ValidationError    # - для работы с изображением
 from django.contrib import admin
-from django.utils.safestring import mark_safe    # строку превращает в HTML отрисовывает со стилями и тегами которые ему передаюд
+# from django.utils.safestring import mark_safe    # строку превращает в HTML отрисовывает со стилями и тегами которые ему передаюд
 
 from .models import *
 
 
+'''
 class NotebookAdminForm(ModelForm):    # форма проверки изображения
     def __init__(self, *args, **kwargs):    # подсказка для загрузки изображения
         super().__init__(*args, **kwargs)    # переопределение
@@ -28,10 +29,11 @@ class NotebookAdminForm(ModelForm):    # форма проверки изобр�
     #     if img.height > max_height or img.width > max_width:    # проверка на максимальное разрешение изображения
     #         raise ValidationError("Разрешение изображения больше максимального!")
     #     return image
+'''
 
 
 class NotebookAdmin(admin.ModelAdmin):
-    form = NotebookAdminForm
+    # form = NotebookAdminForm    # - для работы с изображением
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # для вывода только категори "notebook" при добавлении данных в БД
         if db_field.name == "category":
