@@ -45,3 +45,4 @@ deactivate
 
 14. Тег Include
 
+15. Кастомные тэги шаблонов [Custom template tags]
