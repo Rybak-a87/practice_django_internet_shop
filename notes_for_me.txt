@@ -41,3 +41,5 @@ deactivate
 
 12. Модель представления шаблон (model-view-template)
 
+13. Наследование в шаблонах [Template Inheritance]
+
