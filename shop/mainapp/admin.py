@@ -1,6 +1,6 @@
 # from PIL import Image    # работа с изображением
 
-from django.forms import ModelChoiceField    # ModelForm, ValidationError    # - для работы с изображением
+from django.forms import ModelChoiceField, ModelForm    # ValidationError    # - для работы с изображением
 from django.contrib import admin
 # from django.utils.safestring import mark_safe    # строку превращает в HTML отрисовывает со стилями и тегами которые ему передаюд
 
@@ -32,6 +32,22 @@ class NotebookAdminForm(ModelForm):    # форма проверки изобр�
 '''
 
 
+class SmartphoneAdminForm(ModelForm):    # для рендеринга значений с учетом установленного флажка SD карты (кастомизация админки с помощью Django)
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        instance = kwargs.get("instance")
+        if not instance.sd:
+            self.fields["sd_valume_max"].widget.attrs.update({
+                "readonly": True, "style": "background: lightgray;"
+            })
+
+    # метод для работы с полями (для работы с конкретным объектос def clean_<объект>())
+    def clean(self):
+        if not self.cleaned_data["sd"]:
+            self.cleaned_data["sd_valume_max"] = None
+        return self.cleaned_data
+
+
 class NotebookAdmin(admin.ModelAdmin):
     # form = NotebookAdminForm    # - для работы с изображением
 
@@ -42,6 +58,10 @@ class NotebookAdmin(admin.ModelAdmin):
 
 
 class SmartphoneAdmin(admin.ModelAdmin):
+
+    change_form_template = "base/admin.html"    # подключение своего шаблона для админки (кастомизация админки с побощью js)
+    form = SmartphoneAdminForm     # подключение кастомизации админки с побощью джанго
+
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # для вывода только категори "smartphone" при добавлении данных в БД
         if db_field.name == "category":
             return ModelChoiceField(Category.objects.filter(slug="smartphones"))

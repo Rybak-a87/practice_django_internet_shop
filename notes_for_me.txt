@@ -120,3 +120,5 @@ git pull
 
 16. Добавление товара в корзину (через django shell)
 
+17. Django админка JavaScript, jQuery
+
