@@ -27,16 +27,18 @@
     <p class="mt-4">Характеристики:</p>
 
 <!--   пример - реализация фильтра (тегов)-->
-    аргументы передаются через двоиточие (функция|аргумент:аргумент)
+<!--    аргументы передаются через двоиточие (функция|аргумент:аргумент)-->
     {{ product|product_spec }}
 
+
 <!--    (if) проверка условия или условий-->
-    {% if product.category.slug == "notebooks" %}
-<!--   (include) единоразовая вставка части кода с шаблоном html в нужное место-->
-        {% include "mainapp/include/notebook_specification.html" %}
-    {% else %}
-        {% include "mainapp/include/smartphone_specification.html" %}
-    {% endif %}
+<!--    {% if product.category.slug == "notebooks" }-->
+<!--    (include) единоразовая вставка части кода с шаблоном html в нужное место-->
+<!--        {% include "mainapp/include/notebook_specification.html" }-->
+<!--    {% else }-->
+<!--        {% include "mainapp/include/smartphone_specification.html" }-->
+<!--    {% endif }-->
+
 
 </div>
 

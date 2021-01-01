@@ -42,7 +42,9 @@ class LatestProductsManager:
             if ct_model.exists():
                 if with_respect_to in args:
                     return sorted(
-                        products, key=lambda x: x.__class__._meta.model_name.startswith(with_respect_to), reverse=True
+                        products,
+                        key=lambda x: x.__class__._meta.model_name.startswith(with_respect_to),
+                        reverse=True
                     )
         return products
 
@@ -146,7 +148,9 @@ class Smartphone(Product):
 
 class CartProduct(models.Model):
     user = models.ForeignKey("Customer", verbose_name="Покупатель", on_delete=models.CASCADE)    #? первый аргумент
-    cart = models.ForeignKey("Cart", verbose_name="Корзина", on_delete=models.CASCADE, related_name="related_products")    # related_name - название, используемое для обратной связи от связанной модели
+    cart = models.ForeignKey(
+        "Cart", verbose_name="Корзина", on_delete=models.CASCADE, related_name="related_products"
+    )    # related_name - название, используемое для обратной связи от связанной модели
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)    # ContentType - микрофреймворк который видетвсе модели в Install apps (все модели которые есть в проекте)
     object_id = models.PositiveIntegerField()
     content_object = GenericForeignKey("content_type", "object_id")
@@ -154,14 +158,18 @@ class CartProduct(models.Model):
     final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name="Общая цена")
 
     def __str__(self):
-        return f"Продукт {self.product.title} (для корзины)"
+        return f"Продукт {self.content_object.title} (для корзины)"
 
 
 class Cart(models.Model):
     owner = models.ForeignKey("Customer", verbose_name="Владелец", on_delete=models.CASCADE)
     products = models.ManyToManyField(CartProduct, blank=True, related_name="related_cart")    # связь с объектом CartProdukt (многие ко многим). blank=True - для проверки даных. поле может быть пустым
     total_product = models.PositiveIntegerField(default=0)
-    final_price = models.DecimalField(max_digits=9, decimal_places=2, verbose_name="Общая цена")
+    final_price = models.DecimalField(
+        max_digits=9, decimal_places=2, verbose_name="Общая цена", default=0
+    )
+    in_order = models.BooleanField(default=False)
+    for_anonymous_user = models.BooleanField(default=False)
 
     def __str__(self):
         return str(self.id)
