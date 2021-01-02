@@ -126,3 +126,5 @@ git pull
 
 19. DetailView категории
 
+20. Mixins (миксины)
+

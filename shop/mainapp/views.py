@@ -1,15 +1,22 @@
 from django.shortcuts import render
-from django.views.generic import DetailView
+from django.views.generic import DetailView, View
 
 from .models import Notebook, Smartphone, Category
+from .mixins import CategoryDetailMixin     # должет первый по порядку наследоватся
 
 
-def test_base(request):
-    categories = Category.objects.get_categories_for_left_sidebar()    # для истользования объекта в шаблоне
-    return render(request, "base/base.html", {"categories": categories})
+# def test_base(request):
+#     categories = Category.objects.get_categories_for_left_sidebar()    # для истользования объекта в шаблоне
+#     return render(request, "base/base.html", {"categories": categories})
 
 
-class ProductDetailView(DetailView):
+class BaseView(View):
+    def get(self, request, *args, **kwargs):    # метод - аналог функции test_base
+        categories = Category.objects.get_categories_for_left_sidebar()  # для истользования объекта в шаблоне
+        return render(request, "base/base.html", {"categories": categories})
+
+
+class ProductDetailView(CategoryDetailMixin, DetailView):
     CT_MODEL_MODEL_CLASS = {
         "notebook": Notebook,
         "smartphone": Smartphone,
@@ -25,7 +32,7 @@ class ProductDetailView(DetailView):
     slug_url_kwarg = "slug"
 
 
-class CategoryDetailView(DetailView):
+class CategoryDetailView(CategoryDetailMixin, DetailView):
     model = Category
     queryset = Category.objects.all()
     context_object_name = "category"
