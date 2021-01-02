@@ -68,10 +68,14 @@ class CategoryManager(models.Manager):
 
     def get_categories_for_left_sidebar(self):
         models = get_models_for_count("notebook", "smartphone")
-        qs = list(self.get_queryset().annotate(*models).values())    # инструмент анотации (существует еще инструмент агрегации)
-        return [dict(
-            name=c["name"], slug=c["slug"], count=c[self.CATEGORY_NAME_COUNT_NAME[c["name"]]]
-        ) for c in qs]
+        qs = list(self.get_queryset().annotate(*models))    # инструмент анотации (существует еще инструмент агрегации)
+        data = [
+            dict(
+                name=c.name, url=c.get_absolute_url(),
+                count=getattr(c, self.CATEGORY_NAME_COUNT_NAME[c.name])
+            ) for c in qs
+        ]
+        return data
 
 
 class Category(models.Model):
@@ -81,6 +85,9 @@ class Category(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):    # настройка url
+        return reverse("mainapp:category_detail", kwargs={"slug": self.slug})
 
 
 class Product(models.Model):
