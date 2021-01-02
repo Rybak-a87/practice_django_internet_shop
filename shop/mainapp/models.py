@@ -53,7 +53,7 @@ class LatestProductsManager:
         return products
 
 
-class LatestProducts:
+class LatestProducts:    # вывод товара на главную страницу
     objects = LatestProductsManager()
 
 
@@ -154,7 +154,7 @@ class Notebook(Product):
         return f"{self.category.name} : {self.title}"
 
     def get_absolute_url(self):
-        return get_product_url(self, "product_detail")
+        return get_product_url(self, "mainapp:product_detail")
 
 
 class Smartphone(Product):
@@ -175,7 +175,7 @@ class Smartphone(Product):
         return f"{self.category.name} : {self.title}"
 
     def get_absolute_url(self):
-        return get_product_url(self, "product_detail")
+        return get_product_url(self, "mainapp:product_detail")
 
     # @property
     # def sd(self):

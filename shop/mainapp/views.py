@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views.generic import DetailView, View
 
-from .models import Notebook, Smartphone, Category
+from .models import Notebook, Smartphone, Category, LatestProducts
 from .mixins import CategoryDetailMixin     # должет первый по порядку наследоватся
 
 
@@ -12,8 +12,15 @@ from .mixins import CategoryDetailMixin     # должет первый по п�
 
 class BaseView(View):
     def get(self, request, *args, **kwargs):    # метод - аналог функции test_base
-        categories = Category.objects.get_categories_for_left_sidebar()  # для истользования объекта в шаблоне
-        return render(request, "base/base.html", {"categories": categories})
+        categories = Category.objects.get_categories_for_left_sidebar()   # для истользования объекта в шаблоне
+        products = LatestProducts.objects.get_products_for_main_page(    # для вывода продусков на главной странице
+            "notebook", "smartphone", with_respect_to="notebook"
+        )
+        context = {
+            "categories": categories,
+            "products": products,
+        }
+        return render(request, "base/base.html", context)
 
 
 class ProductDetailView(CategoryDetailMixin, DetailView):
