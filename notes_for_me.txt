@@ -122,3 +122,5 @@ git pull
 
 17. Django админка JavaScript, jQuery
 
+18. Django Manager и шаблоны
+

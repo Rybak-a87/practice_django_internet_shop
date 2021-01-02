@@ -1,11 +1,12 @@
 from django.shortcuts import render
 from django.views.generic import DetailView
 
-from .models import Notebook, Smartphone
+from .models import Notebook, Smartphone, Category
 
 
 def test_base(request):
-    return render(request, "base/base.html")
+    categories = Category.objects.get_categories_for_left_sidebar()    # для истользования объекта в шаблоне
+    return render(request, "base/base.html", {"categories": categories})
 
 
 class ProductDetailView(DetailView):

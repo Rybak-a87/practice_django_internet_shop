@@ -14,6 +14,10 @@ from django.urls import reverse
 User = get_user_model()    # юзер из settings.AUTH_USER_MODEL
 
 
+def get_models_for_count(*model_names):
+    return [models.Count(model_name) for model_name in model_names]
+
+
 def get_product_url(obj, viewname):    # функция для настройки URL для объекта
     ct_model = obj.__class__._meta.model_name
     return reverse(viewname, kwargs={"ct_model": ct_model, "slug": obj.slug})
@@ -53,9 +57,27 @@ class LatestProducts:
     objects = LatestProductsManager()
 
 
+class CategoryManager(models.Manager):
+    CATEGORY_NAME_COUNT_NAME = {
+        "Ноутбуки": "notebook__count",
+        "Смартфоны": "smartphone__count"
+    }
+
+    def get_queryset(self):
+        return super().get_queryset()
+
+    def get_categories_for_left_sidebar(self):
+        models = get_models_for_count("notebook", "smartphone")
+        qs = list(self.get_queryset().annotate(*models).values())    # инструмент анотации (существует еще инструмент агрегации)
+        return [dict(
+            name=c["name"], slug=c["slug"], count=c[self.CATEGORY_NAME_COUNT_NAME[c["name"]]]
+        ) for c in qs]
+
+
 class Category(models.Model):
     name = models.CharField(max_length=255, verbose_name="Имя категории")    # строка из 255 символов
     slug = models.SlugField(unique=True)    # уникальный слаг для URL
+    objects = CategoryManager()
 
     def __str__(self):
         return self.name
