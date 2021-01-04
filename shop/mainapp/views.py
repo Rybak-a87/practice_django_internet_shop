@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from django.contrib.contenttypes.models import ContentType
+from django.contrib import messages    # выводит информацию о каких либо осуществленных действиях
 from django.http import HttpResponseRedirect    # для перенаправления
 from django.views.generic import DetailView, View
 
@@ -13,7 +14,7 @@ from .mixins import CategoryDetailMixin, CartMixin     # должет первы
 
 
 class BaseView(CartMixin, View):
-    def get(self, request, *args, **kwargs):    # метод - аналог функции test_base
+    def get(self, request, *args, **kwargs):    # метод - аналог функции test_base (гет запрос)
         categories = Category.objects.get_categories_for_left_sidebar()   # для истользования объекта в шаблоне
         products = LatestProducts.objects.get_products_for_main_page(    # для вывода продусков на главной странице
             "notebook", "smartphone", with_respect_to="notebook"
@@ -72,6 +73,7 @@ class AddToCartView(CartMixin, View):
         if created:    # проверяет был ли создан новый объект (чтобы не добавлять один и тот же товар в корзину)
             self.cart.products.add(cart_product)    # добавление в корзину (add - это добавление в многих ко многим)
         self.cart.save()
+        messages.add_message(request, messages.INFO, "Товар успешно добавлен")    # вывод информации о действии
         return HttpResponseRedirect("/cart/")    # перенаправить сразу в корзину
 
 
@@ -87,8 +89,29 @@ class DeleteFromCartView(CartMixin, View):
             object_id=product.id,
         )
         self.cart.products.remove(cart_product)  # удаление из корзины (remove - это удаление в многих ко многим)
+        cart_product.delete()    # удаление товара из базы данных
         self.cart.save()
+        messages.add_message(request, messages.INFO, "Товар успешно удален")  # вывод информации о действии
         return HttpResponseRedirect("/cart/")  # перенаправить сразу в корзину
+
+
+class ChangeQTYView(CartMixin, View):
+    def post(self, request, *args, **kwargs):    # пост запрос
+        ct_model = kwargs.get("ct_model")  # контент-тайп модели
+        product_slug = kwargs.get("slug")  # слаг товара
+        content_type = ContentType.objects.get(model=ct_model)  # определение модели для выбранного товара
+        product = content_type.model_class().objects.get(
+            slug=product_slug)  # получение продукта через модель, находя продукт по слагу товара
+        cart_product = CartProduct.objects.get(
+            user=self.cart.owner, cart=self.cart, content_type=content_type,
+            object_id=product.id,
+        )
+        qty = int(request.POST.get("qty"))
+        cart_product.qty = qty
+        cart_product.save()    # посчитать наличие корзины
+        self.cart.save()    # сохранить информацию в корзину
+        messages.add_message(request, messages.INFO, "Количество успешно изменено")  # вывод информации о действии
+        return HttpResponseRedirect("/cart/")
 
 
 class CartView(CartMixin, View):
