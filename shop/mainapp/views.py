@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect    # для перенаправл�
 from django.views.generic import DetailView, View
 
 from .models import Notebook, Smartphone, Category, LatestProducts, Customer, Cart, CartProduct
-from .mixins import CategoryDetailMixin     # должет первый по порядку наследоватся
+from .mixins import CategoryDetailMixin, CartMixin     # должет первый по порядку наследоватся
 
 
 # def test_base(request):
@@ -12,10 +12,8 @@ from .mixins import CategoryDetailMixin     # должет первый по п�
 #     return render(request, "base/base.html", {"categories": categories})
 
 
-class BaseView(View):
+class BaseView(CartMixin, View):
     def get(self, request, *args, **kwargs):    # метод - аналог функции test_base
-        customer = Customer.objects.get(user=request.user)
-        cart = Cart.objects.get(owner=customer)
         categories = Category.objects.get_categories_for_left_sidebar()   # для истользования объекта в шаблоне
         products = LatestProducts.objects.get_products_for_main_page(    # для вывода продусков на главной странице
             "notebook", "smartphone", with_respect_to="notebook"
@@ -23,12 +21,12 @@ class BaseView(View):
         context = {
             "categories": categories,
             "products": products,
-            "cart": cart,
+            "cart": self.cart,
         }
         return render(request, "base/base.html", context)
 
 
-class ProductDetailView(CategoryDetailMixin, DetailView):
+class ProductDetailView(CartMixin, CategoryDetailMixin, DetailView):
     CT_MODEL_MODEL_CLASS = {
         "notebook": Notebook,
         "smartphone": Smartphone,
@@ -49,7 +47,7 @@ class ProductDetailView(CategoryDetailMixin, DetailView):
         return context
 
 
-class CategoryDetailView(CategoryDetailMixin, DetailView):
+class CategoryDetailView(CartMixin, CategoryDetailMixin, DetailView):
     model = Category
     queryset = Category.objects.all()
     context_object_name = "category"
@@ -57,31 +55,30 @@ class CategoryDetailView(CategoryDetailMixin, DetailView):
     slug_url_kwarg = "slug"
 
 
-class AddToCartView(View):
+class AddToCartView(CartMixin, View):
     def get(self, request, *args, **kwargs):
         # логика добавление в корзину
         ct_model = kwargs.get("ct_model")    # контент-тайп модели
         product_slug = kwargs.get("slug")    # слаг товара
-        customer = Customer.objects.get(user=request.user)    # определение покупателя
-        cart = Cart.objects.get(owner=customer, in_order=False)    # выбор корзины данного покупателя
+        # заменено миксином <CartMixin>
+        # customer = Customer.objects.get(user=request.user)    # определение покупателя
+        # cart = Cart.objects.get(owner=customer, in_order=False)    # выбор корзины данного покупателя
         content_type = ContentType.objects.get(model=ct_model)    # определение модели для выбранного товара
         product = content_type.model_class().objects.get(slug=product_slug)    # получение продукта через модель, находя продукт по слагу товара
         cart_product, created = CartProduct.objects.get_or_create(    # создание нового карт-продукт объекта с необходимым набором аргументов (get_or_create - для проверки наличия товара в корзине (возвращает кортеж)
-            user=cart.owner, cart=cart, content_type=content_type,
+            user=self.cart.owner, cart=self.cart, content_type=content_type,
             object_id=product.id,
         )
         if created:    # проверяет был ли создан новый объект (чтобы не добавлять один и тот же товар в корзину)
-            cart.products.add(cart_product)    # добавление в корзину (add - это добавление в многих ко многим)
+            self.cart.products.add(cart_product)    # добавление в корзину (add - это добавление в многих ко многим)
         return HttpResponseRedirect("/cart/")    # перенаправить сразу в корзину
 
 
-class CartView(View):
+class CartView(CartMixin, View):
     def get(self, request, *args, **kwargs):
-        customer = Customer.objects.get(user=request.user)
-        cart = Cart.objects.get(owner=customer)
         categories = Category.objects.get_categories_for_left_sidebar()
         context = {
-            "cart": cart,
+            "cart": self.cart,
             "categories": categories,
         }
         return render(request, "mainapp/cart.html", context)
