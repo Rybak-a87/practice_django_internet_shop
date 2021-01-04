@@ -71,6 +71,7 @@ class AddToCartView(CartMixin, View):
         )
         if created:    # проверяет был ли создан новый объект (чтобы не добавлять один и тот же товар в корзину)
             self.cart.products.add(cart_product)    # добавление в корзину (add - это добавление в многих ко многим)
+        self.cart.save()
         return HttpResponseRedirect("/cart/")    # перенаправить сразу в корзину
 
 
