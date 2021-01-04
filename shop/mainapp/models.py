@@ -102,7 +102,7 @@ class Product(models.Model):
                                  on_delete=models.CASCADE)  # связь с объектом Category (один ко многим)
     title = models.CharField(max_length=255, verbose_name="Наименование")
     slug = models.SlugField(unique=True)
-    image = models.ImageField(verbose_name="Изображение")  # изображение
+    image = models.ImageField(verbose_name="Изображение")    # изображение (аргумент <upload_to=""> - путь сохранения файла)
     description = models.TextField(verbose_name="Описание", null=True)  # большой текст (null=True - может быть пустым)
     price = models.DecimalField(max_digits=9, decimal_places=2,
                                 verbose_name="Цена")  # 1-количество цифр 2-цифры после запятой
@@ -129,7 +129,7 @@ class Product(models.Model):
         img = Image.open(image)
         new_img = img.convert("RGB")  # конвертирование изображения c "RGBA" в "RGB"
         resize_new_img = new_img.resize((200, 200),
-                                        resample=Image.ANTIALIAS)  # (первый способ) 1-до какого разрешения уменьшить изображение 2-способ уменьшения (resize необходимо заносить в новую переменную)
+                                        resample=Image.ANTIALIAS)  # (первый способ) 1-до какого разрешения уменьшить изображение (200x200) 2-способ уменьшения (resize необходимо заносить в новую переменную)
         # new_img.thumbnail((200, 200),resample=Image.ANTIALIAS)    # (второй способ) не нужно заносить в новую переменную (меняет существующюю переменную)
         filestream = BytesIO()  # преобразование изображения в поток данных (байты)
         resize_new_img.save(filestream, "JPEG", quality=90)  # сохранить изображение в filestream, формат, качество
@@ -197,6 +197,10 @@ class CartProduct(models.Model):
 
     def __str__(self):
         return f"Продукт {self.content_object.title} (для корзины)"
+
+    def save(self, *args, **kwargs):    # для определения цены товара в зависимости от его количества
+        self.final_price = self.qty * self.content_object.price
+        super().save(*args, **kwargs)
 
 
 class Cart(models.Model):

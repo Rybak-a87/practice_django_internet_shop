@@ -66,13 +66,13 @@ class AddToCartView(View):
         cart = Cart.objects.get(owner=customer, in_order=False)    # выбор корзины данного покупателя
         content_type = ContentType.objects.get(model=ct_model)    # определение модели для выбранного товара
         product = content_type.model_class().objects.get(slug=product_slug)    # получение продукта через модель, находя продукт по слагу товара
-        cart_product, created = CartProduct.objects.get_or_create(    # создание нового карт-продукт объекта с необходимым набором аргументов (get_or_create - для проверки наличия товара в корзине (возвращает кортеж0)
+        cart_product, created = CartProduct.objects.get_or_create(    # создание нового карт-продукт объекта с необходимым набором аргументов (get_or_create - для проверки наличия товара в корзине (возвращает кортеж)
             user=cart.owner, cart=cart, content_type=content_type,
-            object_id=product.id, final_price=product.price
+            object_id=product.id,
         )
-        cart.products.add(cart_product)    # добавление в корзину (add - это добавление в многих ко многим)
+        if created:    # проверяет был ли создан новый объект (чтобы не добавлять один и тот же товар в корзину)
+            cart.products.add(cart_product)    # добавление в корзину (add - это добавление в многих ко многим)
         return HttpResponseRedirect("/cart/")    # перенаправить сразу в корзину
-
 
 
 class CartView(View):
