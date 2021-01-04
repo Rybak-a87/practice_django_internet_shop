@@ -75,6 +75,22 @@ class AddToCartView(CartMixin, View):
         return HttpResponseRedirect("/cart/")    # перенаправить сразу в корзину
 
 
+class DeleteFromCartView(CartMixin, View):
+    def get(self, request, *args, **kwargs):
+        ct_model = kwargs.get("ct_model")  # контент-тайп модели
+        product_slug = kwargs.get("slug")  # слаг товара
+        content_type = ContentType.objects.get(model=ct_model)  # определение модели для выбранного товара
+        product = content_type.model_class().objects.get(
+            slug=product_slug)  # получение продукта через модель, находя продукт по слагу товара
+        cart_product = CartProduct.objects.get(
+            user=self.cart.owner, cart=self.cart, content_type=content_type,
+            object_id=product.id,
+        )
+        self.cart.products.remove(cart_product)  # удаление из корзины (remove - это удаление в многих ко многим)
+        self.cart.save()
+        return HttpResponseRedirect("/cart/")  # перенаправить сразу в корзину
+
+
 class CartView(CartMixin, View):
     def get(self, request, *args, **kwargs):
         categories = Category.objects.get_categories_for_left_sidebar()
