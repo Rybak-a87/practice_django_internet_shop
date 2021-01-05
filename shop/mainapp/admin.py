@@ -36,15 +36,16 @@ class SmartphoneAdminForm(ModelForm):    # для рендеринга знач�
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         instance = kwargs.get("instance")
+
+        #!!!!!!!! ИЗ-ЗА ЭТОЙ ПРОВЕРКИ НЕ ДОБАВЛЯЮТСЯ НОВЫЕ СМАРТФОНЫ
         if not instance.sd:
-            self.fields["sd_valume_max"].widget.attrs.update({
+            self.fields["sd_volume_max"].widget.attrs.update({
                 "readonly": True, "style": "background: lightgray;"
             })
 
-    # метод для работы с полями (для работы с конкретным объектос def clean_<объект>())
-    def clean(self):
+    def clean(self):    # метод для работы с полями при сохранении (для работы с конкретным объектос def clean_<объект>())
         if not self.cleaned_data["sd"]:
-            self.cleaned_data["sd_valume_max"] = None
+            self.cleaned_data["sd_volume_max"] = None
         return self.cleaned_data
 
 
@@ -60,7 +61,7 @@ class NotebookAdmin(admin.ModelAdmin):
 class SmartphoneAdmin(admin.ModelAdmin):
 
     change_form_template = "base/admin.html"    # подключение своего шаблона для админки (кастомизация админки с побощью js)
-    form = SmartphoneAdminForm     # подключение кастомизации админки с побощью джанго
+    # form = SmartphoneAdminForm     # подключение кастомизации админки с побощью джанго (!!! НЕ КОРЕКТНО РАБОТАЕТ ПРОВЕРКА)
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):    # для вывода только категори "smartphone" при добавлении данных в БД
         if db_field.name == "category":
@@ -80,6 +81,6 @@ admin.site.register(Customer)
 class OrderAdmin(admin.ModelAdmin):
     fields = (
         "customer", "first_name", "last_name",
-        "phone", "address", "status",
+        "phone", "cart", "address", "status",
         "buying_type", "comment", "order_date"
     )

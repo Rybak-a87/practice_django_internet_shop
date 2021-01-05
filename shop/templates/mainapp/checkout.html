@@ -36,8 +36,9 @@
     </tbody>
 </table>
 <hr>
-<form action="" method="POST">
-<h3 class="text-center mt-5 mb-5">Форма заказа</h3>
+<form action="{% url 'mainapp:make_order' %}" method="POST">
+    {% csrf_token %}
+    <h3 class="text-center mt-5 mb-5">Форма заказа</h3>
 
     <!--добакление к рендерингу форм crispy_forms-->
     {{ form|crispy }}

@@ -103,7 +103,7 @@ class Product(models.Model):
                                  on_delete=models.CASCADE)  # связь с объектом Category (один ко многим)
     title = models.CharField(max_length=255, verbose_name="Наименование")
     slug = models.SlugField(unique=True)
-    image = models.ImageField(verbose_name="Изображение")    # изображение (аргумент <upload_to=""> - путь сохранения файла)
+    image = models.ImageField(verbose_name="Изображение", upload_to="mainapp/")    # изображение (аргумент <upload_to=""> - путь сохранения файла)
     description = models.TextField(verbose_name="Описание", null=True)  # большой текст (null=True - может быть пустым)
     price = models.DecimalField(max_digits=9, decimal_places=2,
                                 verbose_name="Цена")  # 1-количество цифр 2-цифры после запятой
@@ -220,22 +220,27 @@ class Cart(models.Model):
     def __str__(self):
         return str(self.id)
 
-    def save(self, *args, **kwargs):    # какая сумма товаров и какое количество товара в корзине
-        cart_data = self.products.aggregate(models.Sum("final_price"), models.Count("id"))    # <aggregate> принимает выражение (посчитать общюю сумму всех продуктов и количество товаров в корзине)
-        # определение суммы корзины (с замена None на 0)
-        if cart_data.get("final_price__sum"):
-            self.final_price = cart_data["final_price__sum"]
-        else:
-            self.final_price = 0
-        self.total_product = cart_data["id__count"]    # определение количества товаров в корзине
-        super().save(*args, **kwargs)
+
+''' для коректной работы метода - перенесено с файл utils.py    
+    # def save(self, *args, **kwargs):    # пересчитать корзиту (какая сумма товаров и какое количество товара в корзине)
+    #     cart_data = self.products.aggregate(models.Sum("final_price"), models.Count("id"))    # <aggregate> принимает выражение (посчитать общюю сумму всех продуктов и количество товаров в корзине)
+    #     # определение суммы корзины (с замена None на 0)
+    #     if cart_data.get("final_price__sum"):
+    #         self.final_price = cart_data["final_price__sum"]
+    #     else:
+    #         self.final_price = 0
+    #     self.total_product = cart_data["id__count"]    # определение количества товаров в корзине
+    #     super().save(*args, **kwargs)
+'''
 
 
 class Customer(models.Model):
     user = models.ForeignKey(User, verbose_name="Пользователь", on_delete=models.CASCADE)    # связь на юзера из settings
     phone = models.CharField(max_length=20, verbose_name="Номер телефона", null=True, blank=True)    # желательно чтоб было обязательным к заполнению
     address = models.CharField(max_length=255, verbose_name="Адрес", null=True, blank=True)    # желательно чтоб было обязательным к заполнению
-    orders = models.ManyToManyField("Order", verbose_name="Заказы покупателя", related_name="related_customer")
+    orders = models.ManyToManyField(
+        "Order", verbose_name="Заказы покупателя", related_name="related_customer", null=True, blank=True
+    )
 
     def __str__(self):
         return f"Покупатель {self.user.first_name} {self.user.last_name}"
@@ -268,6 +273,7 @@ class Order(models.Model):
     )
     first_name = models.CharField(max_length=255, verbose_name="Имя")
     last_name = models.CharField(max_length=255, verbose_name="Фамилия")
+    cart = models.ForeignKey(Cart, verbose_name="Корзина", on_delete=models.CASCADE)
     phone = models.CharField(max_length=20, verbose_name="Номер телефона")
     address = models.CharField(max_length=1024, verbose_name="Адрес", null=True, blank=True)
     status = models.CharField(
