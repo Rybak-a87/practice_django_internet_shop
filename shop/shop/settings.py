@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "mainapp",    # подключение приложения
+    "crispy_forms",    # приложение для отображения ровных и красивых полей формы для заполнения
 ]
 
 MIDDLEWARE = [
@@ -128,3 +129,6 @@ STATICFILES_DIRS = (    # директории где Джанго будет и
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = os.path.join(BASE_DIR, "media")    # подключение папки "media" в корне проекта
+
+
+CRISPY_TEMPLATE_PACK = "bootstrap4"    # указать с каким фреймфорком работаем
