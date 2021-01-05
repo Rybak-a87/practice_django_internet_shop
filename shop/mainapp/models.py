@@ -6,6 +6,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.urls import reverse
+from django.utils import timezone
 # from django.core.files.uploadedfile import InMemoryUploadedFile    # - для работы с изображением
 
 # from io import BytesIO    # для преобразования изображения в байты
@@ -112,6 +113,7 @@ class Product(models.Model):
 
     def get_model_name(self):
         return self.__class__.__name__.lower()
+
 
 '''
     def save(self, *args, **kwargs):  # переопределение и сохранение изображения
@@ -233,9 +235,56 @@ class Customer(models.Model):
     user = models.ForeignKey(User, verbose_name="Пользователь", on_delete=models.CASCADE)    # связь на юзера из settings
     phone = models.CharField(max_length=20, verbose_name="Номер телефона", null=True, blank=True)    # желательно чтоб было обязательным к заполнению
     address = models.CharField(max_length=255, verbose_name="Адрес", null=True, blank=True)    # желательно чтоб было обязательным к заполнению
+    orders = models.ManyToManyField("Order", verbose_name="Заказы покупателя", related_name="related_customer")
 
     def __str__(self):
         return f"Покупатель {self.user.first_name} {self.user.last_name}"
+
+
+class Order(models.Model):
+    STATUS_NEW = "new"
+    STATUS_IN_PROGRESS = "in_progress"
+    STATUS_READY = "is_ready"
+    STATUS_COMPLETED = "completed"
+
+    BUYING_TYPE_SELF = "self"
+    BUYING_TYPE_DELIVERY = "delivery"
+
+    STATUS_CHOICES = (
+        (STATUS_NEW, "Новый заказ"),
+        (STATUS_IN_PROGRESS, "Заказ в обработке"),
+        (STATUS_READY, "Заказ готов"),
+        (STATUS_COMPLETED, "Заказ выполнен")
+    )
+
+    BUYING_TYPE_CHOICES = (
+        (BUYING_TYPE_SELF, "Самовывоз"),
+        (BUYING_TYPE_DELIVERY, "Доставка")
+    )
+
+    customer = models.ForeignKey(
+        Customer, verbose_name="Покупатель",
+        related_name="related_orders", on_delete=models.CASCADE
+    )
+    first_name = models.CharField(max_length=255, verbose_name="Имя")
+    last_name = models.CharField(max_length=255, verbose_name="Фамилия")
+    phone = models.CharField(max_length=20, verbose_name="Номер телефона")
+    address = models.CharField(max_length=1024, verbose_name="Адрес", null=True, blank=True)
+    status = models.CharField(
+        max_length=100, verbose_name="Статус заказа",
+        choices=STATUS_CHOICES,    # choices - это всплывающий список из переданного в него кортежа
+        default=STATUS_NEW
+    )
+    buying_type = models.CharField(
+        max_length=100, verbose_name="Тип заказа",
+        choices=BUYING_TYPE_CHOICES, default=BUYING_TYPE_SELF
+    )
+    comment = models.TextField(verbose_name="Комментаний к заказу", null=True, blank=True)
+    created_date = models.DateTimeField(verbose_name="Дата создания заказа", auto_now=True)    # не будет отображен в админке при заполнении формы
+    order_date = models.DateField(verbose_name="Дата получения заказа", default=timezone.now)
+
+    def __str__(self):
+        return str(self.id)
 
 
 '''

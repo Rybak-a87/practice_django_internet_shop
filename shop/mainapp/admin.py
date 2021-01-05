@@ -75,3 +75,11 @@ admin.site.register(CartProduct)
 admin.site.register(Cart)
 admin.site.register(Customer)
 
+# admin.site.register(Order)    # регистрация модели так или как ниже
+@admin.register(Order)
+class OrderAdmin(admin.ModelAdmin):
+    fields = (
+        "customer", "first_name", "last_name",
+        "phone", "address", "status",
+        "buying_type", "comment", "order_date"
+    )
