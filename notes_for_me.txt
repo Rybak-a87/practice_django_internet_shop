@@ -152,3 +152,6 @@ git pull
     a) установка можуля (пакета) - pip install django-crispy-forms
 
 32. Создание заказа
+
+33. Тестирование (TestCase)
+    a) python manage.py test
